@@ -12,8 +12,11 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.FuelConstants.*;
+
+import java.util.function.DoubleSupplier;
 
 public class CANFuelSubsystem extends SubsystemBase {
   private final SparkMax feederRoller;
@@ -51,10 +54,10 @@ public class CANFuelSubsystem extends SubsystemBase {
   }
 
   // A method to set the rollers to values for intaking
-  public void intake() {
-    feederRoller.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
+  public void intake(double power) {
+    feederRoller.set(-power); //SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE)
     intakeLauncherRoller
-        .setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
+        .set(power); //SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE)
   }
 
   // A method to set the rollers to values for ejecting fuel out the intake. Uses
@@ -99,6 +102,12 @@ public class CANFuelSubsystem extends SubsystemBase {
   public Command launchCommand() {
     return this.run(() -> launch());
   }
+
+  // Default Intake Command
+  public Command intakeSpeedCommand(CANFuelSubsystem fuelSubsystem, DoubleSupplier forward, DoubleSupplier reverse) {
+    return Commands.run(() -> intake(forward.getAsDouble() - reverse.getAsDouble()), fuelSubsystem);
+  }
+
 
   @Override
   public void periodic() {

@@ -64,8 +64,14 @@ public class RobotContainer {
   private void configureBindings() {
 
     // While the left bumper on operator controller is held, intake Fuel
+    
+    /* 
     operatorController.leftBumper()
         .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
+    */
+
+    ballSubsystem.setDefaultCommand(ballSubsystem.intakeSpeedCommand(ballSubsystem, () -> operatorController.getLeftTriggerAxis(), () -> operatorController.getRightTriggerAxis()));
+    
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
     operatorController.rightBumper()
@@ -84,10 +90,12 @@ public class RobotContainer {
     // value). The X-axis is also inverted so a positive value (stick to the right)
     // results in clockwise rotation (front of the robot turning right). Both axes
     // are also scaled down so the rotation is more easily controllable.
+
+    // Changed Signs so forward is intake side - Mr. michaud 22 Jan 26
     driveSubsystem.setDefaultCommand(
         driveSubsystem.driveArcade(
-            () -> -driverController.getLeftY() * DRIVE_SCALING,
-            () -> -driverController.getRightX() * ROTATION_SCALING));
+            () -> driverController.getLeftY() * DRIVE_SCALING,
+            () -> driverController.getRightX() * ROTATION_SCALING));
   }
 
   /**

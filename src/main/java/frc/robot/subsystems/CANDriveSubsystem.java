@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,8 +28,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final DifferentialDrive drive;
 
   public CANDriveSubsystem() {
-    // create brushless motors for drive
-    // NEO 1.0 Motors - Mr. Michaud
+    // create brushed motors for drive
     leftLeader = new SparkMax(LEFT_LEADER_ID, MotorType.kBrushless);
     leftFollower = new SparkMax(LEFT_FOLLOWER_ID, MotorType.kBrushless);
     rightLeader = new SparkMax(RIGHT_LEADER_ID, MotorType.kBrushless);
@@ -53,6 +53,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     config.voltageCompensation(12);
     config.smartCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT);
+    config.idleMode(IdleMode.kCoast); // Added change to Coast Mode - Mr. Michaud 22 Jan 26. Might need to alter for Autonomous
 
     // Set configuration to follow each leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped

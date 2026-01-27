@@ -17,7 +17,6 @@ package frc.robot;
 public final class Constants {
   public static final class DriveConstants {
     // Motor controller IDs for drivetrain motors
-    // Updated by Mr. Michaud for Marist Robotics Conventions
     public static final int LEFT_LEADER_ID = 10;
     public static final int LEFT_FOLLOWER_ID = 11;
     public static final int RIGHT_LEADER_ID = 12;
@@ -30,7 +29,6 @@ public final class Constants {
 
   public static final class FuelConstants {
     // Motor controller IDs for Fuel Mechanism motors
-    // Updated by Mr. Michaud for Marist Robotics Conventions
     public static final int FEEDER_MOTOR_ID = 20;
     public static final int INTAKE_LAUNCHER_MOTOR_ID = 21;
 
@@ -41,11 +39,10 @@ public final class Constants {
     // Voltage values for various fuel operations. These values may need to be tuned
     // based on exact robot construction.
     // See the Software Guide for tuning information
-    // These are for brushed motors - might need to reset to brushless values
     public static final double INTAKING_FEEDER_VOLTAGE = -12;
     public static final double INTAKING_INTAKE_VOLTAGE = 10;
     public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
-    public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10.6;
+    public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10;  // Original 10.6
     public static final double SPIN_UP_FEEDER_VOLTAGE = -6;
     public static final double SPIN_UP_SECONDS = 1;
   }
@@ -58,8 +55,7 @@ public final class Constants {
 
     // This value is multiplied by the joystick value when driving the robot to
     // help avoid driving and turning too fast and being difficult to control
-    // Speed Control Values
     public static final double DRIVE_SCALING = .7;
-    public static final double ROTATION_SCALING = .8;
+    public static final double ROTATION_SCALING = .5;
   }
 }

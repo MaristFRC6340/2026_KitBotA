@@ -33,6 +33,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private NetworkTable limTable;
   private NetworkTableEntry tx;
 
+  // Fields for Computing Auto Aim with PID elements
   private double turnError;
   private double kP = 0.02;
   private double turnPower;
@@ -91,9 +92,10 @@ public class CANDriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Get and Print Tx
     // Get Turn Error from network Table
+    // Compute turnPower and store in field
     turnError = tx.getDouble(0);
     turnPower = kP * turnError;
-    System.out.println("TurnPower " + turnPower);
+    // System.out.println("TurnPower " + turnPower);  // Debugging
 
   }
 
@@ -103,9 +105,14 @@ public class CANDriveSubsystem extends SubsystemBase {
         () -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()));
   }
 
-  public Command aimCommand() {
-    // Compute turnPower
-    
+
+  /**
+   * Gets the field turnPower and applies it to 
+   * turn the robot to face the detected April Tag
+   * First draft for Auto Aiming
+   * @return Commmand to auto Aim Robot
+   */
+  public Command aimCommand() {    
     return this.run(
       () -> drive.arcadeDrive(0, turnPower));
   }

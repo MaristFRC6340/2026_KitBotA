@@ -70,9 +70,7 @@ public class RobotContainer {
         .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
     */
 
-    ballSubsystem.setDefaultCommand(ballSubsystem.intakeSpeedCommand(ballSubsystem, 
-                () -> operatorController.getLeftTriggerAxis(), 
-                () -> operatorController.getRightTriggerAxis()));
+    ballSubsystem.setDefaultCommand(ballSubsystem.intakeSpeedCommand(ballSubsystem, () -> operatorController.getLeftTriggerAxis(), () -> operatorController.getRightTriggerAxis()));
     
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
@@ -85,6 +83,8 @@ public class RobotContainer {
     operatorController.a()
         .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()));
 
+    driverController.a().whileTrue(driveSubsystem.aimCommand());
+    
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
     // controller. The Y axis of the controller is inverted so that pushing the
@@ -110,4 +110,3 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 }
-

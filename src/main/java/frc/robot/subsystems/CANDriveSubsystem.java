@@ -13,6 +13,9 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -26,6 +29,14 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final SparkMax rightFollower;
 
   private final DifferentialDrive drive;
+
+  private NetworkTable limTable;
+  private NetworkTableEntry tx;
+
+  private double turnError;
+  private double kP = 0.02;
+  private double turnPower;
+  
 
   public CANDriveSubsystem() {
     // create brushed motors for drive
@@ -70,10 +81,20 @@ public class CANDriveSubsystem extends SubsystemBase {
     // so that postive values drive both sides forward
     config.inverted(true);
     leftLeader.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    //binding limelight
+    limTable = NetworkTableInstance.getDefault().getTable("limelight");
+    tx = limTable.getEntry("tx");
   }
 
   @Override
   public void periodic() {
+    // Get and Print Tx
+    // Get Turn Error from network Table
+    turnError = tx.getDouble(0);
+    turnPower = kP * turnError;
+    System.out.println("TurnPower " + turnPower);
+
   }
 
   // Command factory to create command to drive the robot with joystick inputs.
@@ -81,4 +102,12 @@ public class CANDriveSubsystem extends SubsystemBase {
     return this.run(
         () -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()));
   }
+
+  public Command aimCommand() {
+    // Compute turnPower
+    
+    return this.run(
+      () -> drive.arcadeDrive(0, turnPower));
+  }
+  
 }

@@ -106,6 +106,7 @@ public class RobotContainer {
     // are also scaled down so the rotation is more easily controllable.
 
     // Changed Signs so forward is intake side - Mr. michaud 22 Jan 26
+    // Checked GitHub Push - Mr. Michaud 01 Feb 26
     driveSubsystem.setDefaultCommand(
         driveSubsystem.driveArcade(
             () -> driverController.getLeftY() * DRIVE_SCALING,

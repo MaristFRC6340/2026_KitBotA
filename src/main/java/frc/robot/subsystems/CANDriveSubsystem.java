@@ -5,10 +5,14 @@
 package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPLTVController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -19,12 +23,15 @@ import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -121,6 +128,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Reset Gyroscope
     m_gyro.reset();
 
+    // Adjust PID settings for drivetrain
+
     // Defining Pose Estimator
     m_kinematics = new DifferentialDriveKinematics(TRACK_WIDTH);
 
@@ -141,6 +150,35 @@ public class CANDriveSubsystem extends SubsystemBase {
     //binding limelight
     limTable = NetworkTableInstance.getDefault().getTable("limelight");
     tx = limTable.getEntry("tx");
+
+    RobotConfig config2;
+    try {
+      config2 = RobotConfig.fromGUISettings();
+    }
+    catch (Exception e) {
+      config2 = null;
+      e.printStackTrace();
+    }
+
+    //configure autobuilder
+    AutoBuilder.configure(
+      
+      this::getPose,
+      this::resetPose,
+      this::getSpeeds, 
+      (speeds, feedforwards) -> driveSlow(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond), // Need to fix: method that takes speed and speed of rotation
+      new PPLTVController(0.02),
+      config2, 
+      () -> {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      this
+    );
+
   }
 
   @Override
@@ -162,6 +200,8 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     Rotation2d headingRotation2d = new Rotation2d(Math.toRadians(heading));
 
+
+
     // Update Pose Estimate
     m_PoseEstimator.update(
       //m_gyro.getRotation2d(), 
@@ -179,8 +219,65 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Publish for AdvantageScope
     field.setRobotPose(m_PoseEstimator.getEstimatedPosition());
     SmartDashboard.putData("Field", field);
-
   }
+
+  public Pose2d getPose() {
+    return m_PoseEstimator.getEstimatedPosition();
+  }
+
+  public void resetPose(Pose2d pos) {
+
+    double angle = pos.getRotation().getDegrees();
+    double x = pos.getX();
+    double y = pos.getY();
+
+
+    m_PoseEstimator.update(
+      new Rotation2d(angle), x,y);
+
+      //return m_PoseEstimator.getEstimatedPosition();
+  }
+
+  public ChassisSpeeds getSpeeds() {
+    /* 
+   double leftVelocity = m_leftEncoder.getVelocity();
+   double rightVelocity = m_rightEncoder.getVelocity();
+   double velocity = (leftVelocity + rightVelocity) / 2;
+    return new ChassisSpeeds(velocity, 0, 0);
+    */
+
+    // Refactored accounting for meters per second of wheel
+    double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
+    double rightVelocity = m_rightEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
+
+    var wheelSpeeds = new DifferentialDriveWheelSpeeds(leftVelocity, rightVelocity);
+    ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(wheelSpeeds);
+    return chassisSpeeds;
+  }
+
+  // Custom Drive Method for Autonomous
+  public void driveSlow(double x, double z) {
+
+      // Adjust x and z to account for speed:
+      x = x / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
+      //z = z / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
+
+      if (x > 0.3) {
+        x = 0.3;
+      }
+      if (x < -0.3) {
+        x = -0.3;
+      }
+      if (z > 0.3) {
+        z = 0.3;
+      }
+      if (z < -0.3) {
+        z = -0.3;
+      }
+      drive.arcadeDrive(x, z);
+  }
+  
+  
 
   // Command factory to create command to drive the robot with joystick inputs.
   public Command driveArcade(DoubleSupplier xSpeed, DoubleSupplier zRotation) {

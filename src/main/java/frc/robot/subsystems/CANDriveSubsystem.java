@@ -99,7 +99,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     config.voltageCompensation(12);
     config.smartCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT);
-    config.idleMode(IdleMode.kCoast); // Added change to Coast Mode - Mr. Michaud 22 Jan 26. Might need to alter for Autonomous
+    config.idleMode(IdleMode.kBrake); // Added change to Coast Mode - Mr. Michaud 22 Jan 26. Might need to alter for Autonomous
 
     // Set configuration to follow each leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped
@@ -146,6 +146,8 @@ public class CANDriveSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Right Encoder", m_rightEncoder.getPosition());
       SmartDashboard.putNumber("Left Distance", 0);
       SmartDashboard.putNumber("Right Distance", 0);
+      SmartDashboard.putNumber("Forward Input", 0);
+      SmartDashboard.putNumber("Turn Input", 0);
 
     //binding limelight
     limTable = NetworkTableInstance.getDefault().getTable("limelight");
@@ -258,10 +260,13 @@ public class CANDriveSubsystem extends SubsystemBase {
   // Custom Drive Method for Autonomous
   public void driveSlow(double x, double z) {
 
+    
       // Adjust x and z to account for speed:
-      x = x / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
+      x = x /30;
+      z = z/20;
       //z = z / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
-
+      SmartDashboard.putNumber("Forward Input", x);
+      SmartDashboard.putNumber("Turn Input", z);
       if (x > 0.3) {
         x = 0.3;
       }

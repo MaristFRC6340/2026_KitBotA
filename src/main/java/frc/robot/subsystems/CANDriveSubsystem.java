@@ -249,8 +249,10 @@ public class CANDriveSubsystem extends SubsystemBase {
     */
 
     // Refactored accounting for meters per second of wheel
-    double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
-    double rightVelocity = m_rightEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
+    //double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
+    //double rightVelocity = m_rightEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
+    double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
+    double rightVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
 
     var wheelSpeeds = new DifferentialDriveWheelSpeeds(leftVelocity, rightVelocity);
     ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(wheelSpeeds);

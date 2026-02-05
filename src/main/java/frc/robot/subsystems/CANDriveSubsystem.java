@@ -11,7 +11,9 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.controllers.PPLTVController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
@@ -71,7 +73,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private double turnError;
   private double kP = 0.02;
   private double turnPower;
-  private double gearMultiply = 2.25;
+  private double gearMultiply = 1;
   
 
   public CANDriveSubsystem() {
@@ -137,8 +139,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     m_PoseEstimator = new DifferentialDrivePoseEstimator(
       m_kinematics,
       m_gyro.getRotation2d(),
-      m_leftEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
-      m_rightEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
+      -m_leftEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
+      -m_rightEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
       new Pose2d(3.459, 4.187, new Rotation2d(0)));
 
       SmartDashboard.putData("Field", field);
@@ -170,7 +172,11 @@ public class CANDriveSubsystem extends SubsystemBase {
       this::resetPose,
       this::getSpeeds, 
       (speeds, feedforwards) -> driveSlow(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond), // Need to fix: method that takes speed and speed of rotation
-      new PPLTVController(0.02),
+      //new PPLTVController(0.02),
+      new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(0.5, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(0.2, 0.0, 0.0) // Rotation PID constants
+            ),
       config2, 
       () -> {
         var alliance = DriverStation.getAlliance();
@@ -267,25 +273,25 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     
       // Adjust x and z to account for speed:
-      x = x/30;
-      z = z/20;
+      x = x/1;
+      z = z/1;
       //z = z / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
       //the golden dandilion is a golden dandilion - canman 2026
       SmartDashboard.putNumber("Forward Input", x);
       SmartDashboard.putNumber("Turn Input", z);
-      if (x > 0.6) {
-        x = 0.6;
+      if (x > 0.5) {
+        x = 0.5;
       }
-      if (x < -0.6) {
-        x = -0.6;
+      if (x < -0.5) {
+        x = -0.5;
       }
-      if (z > 0.1) {
-        z = 0.1;
+      if (z > 0.4) {
+        z = 0.4;
       }
-      if (z < -0.1) {
-        z = -0.1;
+      if (z < -0.4) {
+        z = -0.4;
       }
-      drive.arcadeDrive(x, z);
+      drive.arcadeDrive(-x, -z);
   }
   
   

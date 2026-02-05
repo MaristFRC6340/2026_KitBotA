@@ -71,6 +71,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private double turnError;
   private double kP = 0.02;
   private double turnPower;
+  private double gearMultiply = 2.25;
   
 
   public CANDriveSubsystem() {
@@ -136,8 +137,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     m_PoseEstimator = new DifferentialDrivePoseEstimator(
       m_kinematics,
       m_gyro.getRotation2d(),
-      m_leftEncoder.getPosition() * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / ENCODER_RESOLUTION,
-      m_rightEncoder.getPosition() * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / ENCODER_RESOLUTION,
+      m_leftEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
+      m_rightEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
       new Pose2d(3.459, 4.187, new Rotation2d(0)));
 
       SmartDashboard.putData("Field", field);
@@ -180,8 +181,10 @@ public class CANDriveSubsystem extends SubsystemBase {
       },
       this
     );
-
-  }
+                          
+      
+   
+}
 
   @Override
   public void periodic() {
@@ -193,8 +196,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     // System.out.println("TurnPower " + turnPower);  // Debugging
 
     // Write Current Encoder Values to Dashboard
-    double leftDistance = -m_leftEncoder.getPosition() * DISTANCE_ADJUST *  GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / ENCODER_RESOLUTION;
-    double rightDistance = -m_rightEncoder.getPosition() * DISTANCE_ADJUST  * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / ENCODER_RESOLUTION;
+    double leftDistance = -m_leftEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply);
+    double rightDistance = -m_rightEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply) ;
 
     // Reading Gyroscope and publishing to Network Table
     double heading = -1 * (m_gyro.getAngle() + GYRO_OFFSET); // Adjust
@@ -251,8 +254,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Refactored accounting for meters per second of wheel
     //double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
     //double rightVelocity = m_rightEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION;
-    double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
-    double rightVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
+    double leftVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply);
+    double rightVelocity = m_leftEncoder.getVelocity() * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply);
 
     var wheelSpeeds = new DifferentialDriveWheelSpeeds(leftVelocity, rightVelocity);
     ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(wheelSpeeds);
@@ -264,22 +267,23 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     
       // Adjust x and z to account for speed:
-      x = x /30;
+      x = x/30;
       z = z/20;
       //z = z / (2 * Math.PI * WHEEL_RADIUS * GEAR_RATIO / ENCODER_RESOLUTION);
+      //the golden dandilion is a golden dandilion - canman 2026
       SmartDashboard.putNumber("Forward Input", x);
       SmartDashboard.putNumber("Turn Input", z);
-      if (x > 0.3) {
-        x = 0.3;
+      if (x > 0.6) {
+        x = 0.6;
       }
-      if (x < -0.3) {
-        x = -0.3;
+      if (x < -0.6) {
+        x = -0.6;
       }
-      if (z > 0.3) {
-        z = 0.3;
+      if (z > 0.1) {
+        z = 0.1;
       }
-      if (z < -0.3) {
-        z = -0.3;
+      if (z < -0.1) {
+        z = -0.1;
       }
       drive.arcadeDrive(x, z);
   }

@@ -15,6 +15,7 @@ import static frc.robot.Constants.OperatorConstants.*;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import static frc.robot.Constants.FuelConstants.*;
@@ -51,6 +52,9 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
 
+    // Establish Named Commands for Pathplanner and Autonomous
+    NamedCommands.registerCommand("Shoot", ballSubsystem.autoStartLauncher().withTimeout(1).andThen(ballSubsystem.feederSpeedCommand(ballSubsystem, FEEDER_LAUNCH_POWER).withTimeout(15)).andThen(() -> ballSubsystem.stop()));
+
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
@@ -80,8 +84,8 @@ public class RobotContainer {
     operatorController.leftBumper()
         .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
     */
-
     ballSubsystem.setDefaultCommand(ballSubsystem.intakeSpeedCommand(ballSubsystem, () -> operatorController.getLeftTriggerAxis(), () -> operatorController.getRightTriggerAxis()));
+
     
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
@@ -101,6 +105,9 @@ public class RobotContainer {
 
     operatorController.b()
         .whileTrue(ballSubsystem.launchCommand());
+
+    // Pre Test for Autonomous Launch Control - Comment Out after Test - michaudc
+    operatorController.x().whileTrue(ballSubsystem.autoStartLauncher().withTimeout(1));
 
 
     driverController.a().whileTrue(driveSubsystem.aimCommand());
@@ -132,4 +139,9 @@ public class RobotContainer {
     return new PathPlannerAuto("Example Auto");
     //return autoChooser.getSelected();
   }
+
+public void onTeleopInit(){
+    
+  }
+
 }

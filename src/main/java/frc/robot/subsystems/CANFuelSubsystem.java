@@ -121,6 +121,15 @@ public class CANFuelSubsystem extends SubsystemBase {
     return Commands.run(() -> intakeLauncherRoller.set(0));
   }
 
+  // Commands for Autonmous Tests - michaudc
+  // Possible Use with Path Planner Auto Routines
+  // Runs Launcher Motors and then stops motors after Command is un-scheduled
+  public Command autoStartLauncher() {
+
+      return Commands.run(() -> intakeLauncherRoller.setVoltage(LAUNCHING_LAUNCHER_VOLTAGE), 
+                           this);
+  }
+
 
   @Override
   public void periodic() {

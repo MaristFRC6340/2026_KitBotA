@@ -17,6 +17,7 @@ import java.util.function.DoubleSupplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.revrobotics.util.StatusLogger;
 
 import static frc.robot.Constants.FuelConstants.*;
 import frc.robot.commands.Autos;
@@ -50,10 +51,12 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    
     configureBindings();
 
     // Establish Named Commands for Pathplanner and Autonomous
     NamedCommands.registerCommand("Shoot", ballSubsystem.autoStartLauncher().withTimeout(1).andThen(ballSubsystem.feederSpeedCommand(ballSubsystem, FEEDER_LAUNCH_POWER).withTimeout(15)).andThen(() -> ballSubsystem.stop()));
+    NamedCommands.registerCommand("Intake", ballSubsystem.intakeSpeedCommand(ballSubsystem, () -> 0.8, () -> 0.0).withTimeout(5));
 
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with

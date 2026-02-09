@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.FuelConstants.*;
 
@@ -84,6 +85,7 @@ public class CANFuelSubsystem extends SubsystemBase {
 
   // A method to spin up the launcher roller while spinning the feeder roller to
   // push Fuel away from the launcher
+
   public void spinUp() {
     feederRoller
         .setVoltage(SmartDashboard.getNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE));
@@ -112,9 +114,14 @@ public class CANFuelSubsystem extends SubsystemBase {
     return Commands.run(() -> intake(forward.getAsDouble() - reverse.getAsDouble()), fuelSubsystem);
   }
 
-  // Feeder Command
+  // Feeder Command variable
   public Command feederSpeedCommand(CANFuelSubsystem fuelSubsystem, double speed) {
     return Commands.run(() -> setFeederSpeed(speed));
+  }
+
+  // Feeder Cmd STATIC 
+    public Command feederSpeedStaticCommand(CANFuelSubsystem fuelSubsystem) {
+    return Commands.run(() -> setFeederSpeed(0.7));
   }
 
   public Command stopLauncher() {
@@ -128,6 +135,17 @@ public class CANFuelSubsystem extends SubsystemBase {
 
       return Commands.run(() -> intakeLauncherRoller.setVoltage(LAUNCHING_LAUNCHER_VOLTAGE), 
                            this);
+  }
+  public Command autoIntake() {
+
+      return Commands.run(() -> 
+      
+      new ParallelCommandGroup(
+      autoStartLauncher(),
+      feederSpeedCommand(this, 0.8)              
+      )
+      
+      );
   }
 
 

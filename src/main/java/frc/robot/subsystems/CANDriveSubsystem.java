@@ -103,7 +103,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     config.voltageCompensation(12);
     config.smartCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT);
     config.idleMode(IdleMode.kBrake); // Added change to Coast Mode - Mr. Michaud 22 Jan 26. Might need to alter for Autonomous
-
+    
     // Set configuration to follow each leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped
     // in and persisting in case of a controller reset due to breaker trip
@@ -141,7 +141,7 @@ public class CANDriveSubsystem extends SubsystemBase {
       m_gyro.getRotation2d(),
       -m_leftEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
       -m_rightEncoder.getPosition()  * 2 * Math.PI * WHEEL_RADIUS / (GEAR_RATIO*gearMultiply),
-      new Pose2d(3.459, 4.187, new Rotation2d(0)));
+      new Pose2d(3.75, 4, new Rotation2d(0)));
 
       SmartDashboard.putData("Field", field);
       SmartDashboard.putString("Pose2D", m_PoseEstimator.getEstimatedPosition().toString());
